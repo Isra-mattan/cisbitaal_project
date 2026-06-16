@@ -194,3 +194,14 @@ def appointment_delete(request, pk):
         messages.success(request, 'Ballanta waa la tiray!')
         return redirect('appointment_list')
     return render(request, 'hospital/appointment_confirm_delete.html', {'appointment': appointment})
+
+# ==========================================
+# AJAX VIEWS
+# ==========================================
+def load_doctors(request):
+    department_id = request.GET.get('department')
+    if department_id:
+        doctors = Doctor.objects.filter(department_id=department_id).order_by('user__first_name')
+    else:
+        doctors = Doctor.objects.none()
+    return render(request, 'hospital/doctor_dropdown_list_options.html', {'doctors': doctors})

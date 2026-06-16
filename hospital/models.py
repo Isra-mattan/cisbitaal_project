@@ -50,6 +50,16 @@ class Patient(models.Model):
     address = models.TextField()
     phone = models.CharField(max_length=15)
     doctor = models.ForeignKey('Doctor', on_delete=models.SET_NULL, null=True, related_name='patients')
+    
+    BLOOD_GROUPS = [('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), ('B-', 'B-'), ('O+', 'O+'), ('O-', 'O-'), ('AB+', 'AB+'), ('AB-', 'AB-')]
+    blood_group = models.CharField(max_length=5, choices=BLOOD_GROUPS, null=True, blank=True)
+    
+    MARITAL_STATUS = [('Single', 'Single'), ('Married', 'Married'), ('Divorced', 'Divorced'), ('Widowed', 'Widowed')]
+    marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS, null=True, blank=True)
+    
+    PATIENT_STATUS = [('Outpatient', 'Outpatient'), ('Inpatient', 'Inpatient'), ('Discharged', 'Discharged')]
+    patient_status = models.CharField(max_length=20, choices=PATIENT_STATUS, default='Outpatient')
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -59,6 +69,12 @@ class Patient(models.Model):
     # ==========================================
 # 3. DOCTOR MANAGEMENT (Sida uu PDF-ka ku qoran yahay)
 # ==========================================
+class Department(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
 class Specialization(models.Model):
     name = models.CharField(max_length=100, unique=True) # Tusaale: Cardiology, Pediatrics
 
@@ -68,10 +84,11 @@ class Specialization(models.Model):
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='doctor_profile')
     specialization = models.ForeignKey(Specialization, on_delete=models.SET_NULL, null=True, related_name='doctors')
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name='doctors')
     phone = models.CharField(max_length=50)
-    shift_start = models.TimeField(null=True, blank=True) # Waqtiga uu shaqada bilaabo
-    shift_end = models.TimeField(null=True, blank=True)   # Waqtiga uu shaqada dhameeyo
-    is_available = models.BooleanField(default=True)      # Hubinta inuu dhakhtarku joogo
+    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female')], null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
+    shift_type = models.CharField(max_length=20, choices=[('Morning', 'Morning'), ('Evening', 'Evening'), ('Night', 'Night')], null=True, blank=True)
 
     def __str__(self): 
         return f"Dr. {self.user.first_name} {self.user.last_name} ({self.specialization.name if self.specialization else 'N/A'})"
@@ -88,8 +105,12 @@ class Staff(models.Model):
 # ==========================================
 class Appointment(models.Model):
     STATUS = [('Pending', 'Pending'), ('Approved', 'Approved'), ('Completed', 'Completed')]
+    TYPE_CHOICES = [('Consultation', 'Consultation'), ('Follow-up', 'Follow-up'), ('Check-up', 'Check-up'), ('Emergency', 'Emergency')]
+    
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    appointment_type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='Consultation')
     appointment_date = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS, default='Pending')
 

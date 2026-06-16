@@ -39,4 +39,6 @@ urlpatterns = [
     path('appointments/create/', views.appointment_create, name='appointment_create'),
     path('appointments/<int:pk>/update/', views.appointment_update, name='appointment_update'),
     path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
+    
+    path('ajax/load-doctors/', views.load_doctors, name='ajax_load_doctors'),
 ]
